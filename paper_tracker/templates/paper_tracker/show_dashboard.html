@@ -1,0 +1,91 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2>{{ profile.display_name }}'s Personalized Dashboard</h2>
+
+<div class="card">
+    <p><strong>Affiliation:</strong> {{ profile.affiliation }}</p>
+    <p><strong>Research Interests:</strong> {{ profile.research_interests }}</p>
+</div>
+
+<h3 class="section-title">Followed Topics</h3>
+
+{% if followed_topics %}
+    <ul>
+        {% for topic in followed_topics %}
+            <li>
+                <a href="{% url 'paper_tracker:show_topic' topic.pk %}">
+                    {{ topic.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No followed topics yet.</p>
+{% endif %}
+
+<h3 class="section-title">Followed Authors</h3>
+
+{% if followed_authors %}
+    <ul>
+        {% for author in followed_authors %}
+            <li>
+                <a href="{% url 'paper_tracker:show_author' author.pk %}">
+                    {{ author.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No followed authors yet.</p>
+{% endif %}
+
+<h3 class="section-title">Followed Institutions</h3>
+
+{% if followed_institutions %}
+    <ul>
+        {% for institution in followed_institutions %}
+            <li>
+                <a href="{% url 'paper_tracker:show_institution' institution.pk %}">
+                    {{ institution.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No followed institutions yet.</p>
+{% endif %}
+
+<h3 class="section-title">Recommended Papers</h3>
+
+{% if recommended_papers %}
+    {% for paper in recommended_papers %}
+        <div class="card paper-card">
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' paper.pk %}">
+                    {{ paper.title }}
+                </a>
+            </h3>
+
+            <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+            <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+
+            {% if paper.topic %}
+                <p><strong>Topic:</strong> {{ paper.topic.name }}</p>
+            {% endif %}
+
+            {% if paper.institution %}
+                <p><strong>Institution:</strong> {{ paper.institution.name }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No recommended papers yet. Follow topics, authors, or institutions to get recommendations.</p>
+{% endif %}
+
+<p>
+    <a href="{% url 'paper_tracker:show_profile' profile.pk %}">Back to profile</a>
+</p>
+{% endblock %}

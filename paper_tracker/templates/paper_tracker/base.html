@@ -1,0 +1,39 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Paper Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'paper_tracker/styles.css' %}">
+</head>
+
+<body>
+    <header class="site-header">
+        <h1 class="site-title">Paper Tracker</h1>
+
+        <nav class="navbar">
+            <a href="{% url 'paper_tracker:show_all_papers' %}">All Papers</a>
+            <a href="{% url 'paper_tracker:search_papers' %}">Search Papers</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'paper_tracker:my_profile' %}">My Profile</a>
+                <a href="{% url 'paper_tracker:create_reading_list' %}">Create Reading List</a>
+
+                <form method="post" action="{% url 'paper_tracker:logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'paper_tracker:login' %}">Login</a>
+                <a href="{% url 'paper_tracker:create_profile' %}">Create Account</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="page-container">
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>

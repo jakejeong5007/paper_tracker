@@ -1,0 +1,44 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}All Papers{% endblock %}
+
+{% block content %}
+<h2>All Papers</h2>
+
+{% if papers %}
+    {% for paper in papers %}
+        <div class="card paper-card">
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' paper.pk %}">
+                    {{ paper.title }}
+                </a>
+            </h3>
+
+            <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+            <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+
+            <p><strong>Topic:</strong>
+                {% if paper.topic %}
+                    <a href="{% url 'paper_tracker:show_topic' paper.topic.pk %}">
+                        {{ paper.topic.name }}
+                    </a>
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+
+            <p><strong>Institution:</strong>
+                {% if paper.institution %}
+                    <a href="{% url 'paper_tracker:show_institution' paper.institution.pk %}">
+                        {{ paper.institution.name }}
+                    </a>
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p class="notice">No papers found.</p>
+{% endif %}
+{% endblock %}

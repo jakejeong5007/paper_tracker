@@ -1,0 +1,35 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}{{ reading_list.name }}{% endblock %}
+
+{% block content %}
+<h2>Reading List: {{ reading_list.name }}</h2>
+
+<div class="card">
+    <p><strong>Owner:</strong>
+        <a href="{% url 'paper_tracker:show_profile' reading_list.user_profile.pk %}">
+            {{ reading_list.user_profile.display_name }}
+        </a>
+    </p>
+
+    <p><strong>Description:</strong> {{ reading_list.description }}</p>
+    <p><strong>Created At:</strong> {{ reading_list.created_at }}</p>
+</div>
+
+<h3 class="section-title">Saved Papers</h3>
+
+{% if saved_papers %}
+    {% for saved_paper in saved_papers %}
+        <div class="card paper-card">
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' saved_paper.paper.pk %}">
+                    {{ saved_paper.paper.title }}
+                </a>
+            </h3>
+            <p class="muted">Saved on {{ saved_paper.saved_date }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No saved papers in this reading list.</p>
+{% endif %}
+{% endblock %}

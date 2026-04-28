@@ -1,0 +1,86 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}Search Papers{% endblock %}
+
+{% block content %}
+<h2>Search Papers</h2>
+
+<form method="get" class="search-form">
+    <p>
+        <label for="query">Search:</label>
+        <input
+            type="text"
+            id="query"
+            name="query"
+            value="{{ query }}"
+            placeholder="Search title, abstract, author, topic, institution, or venue"
+        >
+    </p>
+
+    <p>
+        <label for="topic">Topic:</label>
+        <select name="topic" id="topic">
+            <option value="">All Topics</option>
+            {% for topic in topics %}
+                <option value="{{ topic.pk }}" {% if selected_topic == topic.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ topic.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </p>
+
+    <p>
+        <label for="author">Author:</label>
+        <select name="author" id="author">
+            <option value="">All Authors</option>
+            {% for author in authors %}
+                <option value="{{ author.pk }}" {% if selected_author == author.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ author.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </p>
+
+    <p>
+        <label for="institution">Institution:</label>
+        <select name="institution" id="institution">
+            <option value="">All Institutions</option>
+            {% for institution in institutions %}
+                <option value="{{ institution.pk }}" {% if selected_institution == institution.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ institution.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </p>
+
+    <button type="submit">Search</button>
+    <a class="secondary-link" href="{% url 'paper_tracker:search_papers' %}">Clear</a>
+</form>
+
+<h3 class="section-title">Results</h3>
+
+{% if papers %}
+    {% for paper in papers %}
+        <div class="card paper-card">
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' paper.pk %}">
+                    {{ paper.title }}
+                </a>
+            </h3>
+
+            <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+            <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+
+            {% if paper.topic %}
+                <p><strong>Topic:</strong> {{ paper.topic.name }}</p>
+            {% endif %}
+
+            {% if paper.institution %}
+                <p><strong>Institution:</strong> {{ paper.institution.name }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No papers found.</p>
+{% endif %}
+{% endblock %}

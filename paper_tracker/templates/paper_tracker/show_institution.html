@@ -1,0 +1,71 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}{{ institution.name }}{% endblock %}
+
+{% block content %}
+<h2>Institution: {{ institution.name }}</h2>
+
+<div class="card">
+    <p><strong>Type:</strong> {{ institution.institution_type }}</p>
+    <p><strong>Country:</strong> {{ institution.country }}</p>
+
+    <p><strong>Website:</strong>
+        {% if institution.website %}
+            <a href="{{ institution.website }}">{{ institution.website }}</a>
+        {% else %}
+            None
+        {% endif %}
+    </p>
+
+    {% if user.is_authenticated %}
+        {% if is_following %}
+            <a class="button-link" href="{% url 'paper_tracker:unfollow_institution' institution.pk %}">
+                Unfollow this institution
+            </a>
+        {% else %}
+            <a class="button-link" href="{% url 'paper_tracker:follow_institution' institution.pk %}">
+                Follow this institution
+            </a>
+        {% endif %}
+    {% else %}
+        <p>
+            <a href="{% url 'paper_tracker:login' %}">Login</a>
+            to follow this institution.
+        </p>
+    {% endif %}
+</div>
+
+<h3 class="section-title">Authors</h3>
+
+{% if authors %}
+    <ul>
+        {% for author in authors %}
+            <li>
+                <a href="{% url 'paper_tracker:show_author' author.pk %}">
+                    {{ author.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No authors found for this institution.</p>
+{% endif %}
+
+<h3 class="section-title">Papers</h3>
+
+{% if papers %}
+    {% for paper in papers %}
+        <div class="card paper-card">
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' paper.pk %}">
+                    {{ paper.title }}
+                </a>
+            </h3>
+            <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+            <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No papers found for this institution.</p>
+{% endif %}
+{% endblock %}

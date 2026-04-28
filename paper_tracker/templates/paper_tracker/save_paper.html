@@ -1,0 +1,32 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}Save Paper{% endblock %}
+
+{% block content %}
+<h2>Save Paper</h2>
+
+<div class="card">
+    <h3>{{ paper.title }}</h3>
+    <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+    <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+</div>
+
+{% if profile %}
+    <p class="notice">
+        Saving as: <strong>{{ profile.display_name }}</strong>
+    </p>
+{% endif %}
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Save Paper</button>
+    </form>
+</div>
+
+<p>
+    <a href="{% url 'paper_tracker:show_paper' paper.pk %}">Back to paper</a>
+</p>
+{% endblock %}

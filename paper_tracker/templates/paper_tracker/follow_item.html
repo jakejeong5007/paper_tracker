@@ -1,0 +1,23 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}Follow {{ item }}{% endblock %}
+
+{% block content %}
+<h2>Follow {{ item_type }}</h2>
+
+<div class="card">
+    <p>You are about to follow:</p>
+    <h3>{{ item }}</h3>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Follow</button>
+</form>
+
+<p>
+    <a href="{% url 'paper_tracker:show_all_papers' %}">Back to all papers</a>
+</p>
+{% endblock %}

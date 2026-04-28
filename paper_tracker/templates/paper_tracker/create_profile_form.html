@@ -1,0 +1,26 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<h2>Create Account</h2>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+
+        <h3>Account Information</h3>
+        {{ user_form.as_p }}
+
+        <h3>Profile Information</h3>
+        {{ form.as_p }}
+
+        <button type="submit">Create Account</button>
+    </form>
+</div>
+
+<p>
+    Already have an account?
+    <a href="{% url 'paper_tracker:login' %}">Login here</a>.
+</p>
+{% endblock %}

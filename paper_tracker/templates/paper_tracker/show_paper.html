@@ -1,0 +1,73 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}{{ paper.title }}{% endblock %}
+
+{% block content %}
+<h2>{{ paper.title }}</h2>
+
+<div class="card">
+    <p><strong>Abstract:</strong> {{ paper.abstract }}</p>
+    <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+    <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+    <p><strong>Influence Score:</strong> {{ paper.influence_score }}</p>
+
+    <p><strong>Topic:</strong>
+        {% if paper.topic %}
+            <a href="{% url 'paper_tracker:show_topic' paper.topic.pk %}">
+                {{ paper.topic.name }}
+            </a>
+        {% else %}
+            None
+        {% endif %}
+    </p>
+
+    <p><strong>Institution:</strong>
+        {% if paper.institution %}
+            <a href="{% url 'paper_tracker:show_institution' paper.institution.pk %}">
+                {{ paper.institution.name }}
+            </a>
+        {% else %}
+            None
+        {% endif %}
+    </p>
+
+    <p>
+        <strong>Paper Link:</strong>
+        <a href="{{ paper.paper_link }}">{{ paper.paper_link }}</a>
+    </p>
+
+    {% if paper.pdf_link %}
+        <p>
+            <strong>PDF Link:</strong>
+            <a href="{{ paper.pdf_link }}">{{ paper.pdf_link }}</a>
+        </p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <a class="button-link" href="{% url 'paper_tracker:save_paper' paper.pk %}">
+            Save this paper to a reading list
+        </a>
+    {% else %}
+        <p>
+            <a href="{% url 'paper_tracker:login' %}">Login</a>
+            to save this paper.
+        </p>
+    {% endif %}
+</div>
+
+<h3 class="section-title">Authors</h3>
+
+{% if paper.get_authors %}
+    <ul>
+        {% for author in paper.get_authors %}
+            <li>
+                <a href="{% url 'paper_tracker:show_author' author.pk %}">
+                    {{ author.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No authors listed.</p>
+{% endif %}
+{% endblock %}

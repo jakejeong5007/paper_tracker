@@ -1,0 +1,47 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}{{ topic.name }}{% endblock %}
+
+{% block content %}
+<h2>Topic: {{ topic.name }}</h2>
+
+<div class="card">
+    <p><strong>Category:</strong> {{ topic.category_type }}</p>
+    <p><strong>Description:</strong> {{ topic.description }}</p>
+
+    {% if user.is_authenticated %}
+        {% if is_following %}
+            <a class="button-link" href="{% url 'paper_tracker:unfollow_topic' topic.pk %}">
+                Unfollow this topic
+            </a>
+        {% else %}
+            <a class="button-link" href="{% url 'paper_tracker:follow_topic' topic.pk %}">
+                Follow this topic
+            </a>
+        {% endif %}
+    {% else %}
+        <p>
+            <a href="{% url 'paper_tracker:login' %}">Login</a>
+            to follow this topic.
+        </p>
+    {% endif %}
+</div>
+
+<h3 class="section-title">Papers in this Topic</h3>
+
+{% if papers %}
+    {% for paper in papers %}
+        <div class="card paper-card">
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' paper.pk %}">
+                    {{ paper.title }}
+                </a>
+            </h3>
+            <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+            <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No papers found for this topic.</p>
+{% endif %}
+{% endblock %}

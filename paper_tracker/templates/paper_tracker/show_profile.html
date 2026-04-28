@@ -1,0 +1,48 @@
+{% extends 'paper_tracker/base.html' %}
+
+{% block title %}{{ profile.display_name }}{% endblock %}
+
+{% block content %}
+<h2>{{ profile.display_name }}</h2>
+
+<div class="card">
+    <p><strong>Email:</strong> {{ profile.email }}</p>
+    <p><strong>Affiliation:</strong> {{ profile.affiliation }}</p>
+    <p><strong>Research Interests:</strong> {{ profile.research_interests }}</p>
+    <p><strong>Date Joined:</strong> {{ profile.date_joined }}</p>
+
+    {% if user.is_authenticated and profile.user == user %}
+        <a class="button-link" href="{% url 'paper_tracker:show_dashboard' profile.pk %}">
+            View Personalized Dashboard
+        </a>
+    {% endif %}
+</div>
+
+<h3 class="section-title">Reading Lists</h3>
+
+{% if reading_lists %}
+    <ul>
+        {% for reading_list in reading_lists %}
+            <li>
+                <a href="{% url 'paper_tracker:show_reading_list' reading_list.pk %}">
+                    {{ reading_list.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No reading lists found.</p>
+{% endif %}
+
+<h3 class="section-title">Follows</h3>
+
+{% if follows %}
+    <ul>
+        {% for follow in follows %}
+            <li>{{ follow }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No follows found.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,260 @@
+/* File: styles.css */
+/* Author: Jake Jeong */
+/* Description: Styling for the Paper Tracker web app. */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    background: #f3f4f6;
+    color: #222;
+}
+
+/* Header / Navigation */
+
+.site-header {
+    background: #111827;
+    color: white;
+    padding: 18px 40px;
+}
+
+.site-title {
+    margin: 0;
+    font-size: 28px;
+}
+
+.navbar {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+.logout-form {
+    display: inline;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    font-weight: bold;
+    padding: 0;
+}
+
+.logout-button:hover {
+    text-decoration: underline;
+}
+
+/* Main Layout */
+
+.page-container {
+    max-width: 1050px;
+    margin: 35px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 28px;
+    color: #111827;
+}
+
+h3 {
+    color: #1f2937;
+}
+
+.section-title {
+    margin-top: 35px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+/* Cards */
+
+.card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    margin-top: 0;
+}
+
+.card p {
+    line-height: 1.5;
+}
+
+.paper-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.paper-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* Links and Buttons */
+
+a {
+    color: #2563eb;
+}
+
+a:hover {
+    color: #1d4ed8;
+}
+
+.button-link,
+button {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    padding: 9px 14px;
+    border-radius: 6px;
+    border: none;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.button-link:hover,
+button:hover {
+    background: #1d4ed8;
+    color: white;
+    text-decoration: none;
+}
+
+.secondary-link {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+/* Forms */
+
+form {
+    margin-top: 15px;
+}
+
+form p {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    max-width: 600px;
+    padding: 9px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+textarea {
+    min-height: 100px;
+}
+
+.search-form {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.search-form button {
+    margin-right: 10px;
+}
+
+.logout-form {
+    margin-top: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+    line-height: normal;
+}
+
+.logout-button:hover {
+    text-decoration: underline;
+}
+
+/* Lists */
+
+ul {
+    padding-left: 24px;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+/* Small helper text */
+
+.muted {
+    color: #6b7280;
+}
+
+.notice {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Responsive */
+
+@media (max-width: 700px) {
+    .site-header {
+        padding: 15px 22px;
+    }
+
+    .page-container {
+        margin: 20px;
+        padding: 22px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
