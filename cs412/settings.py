@@ -51,7 +51,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "project.urls"
+ROOT_URLCONF = "cs412.urls"
 
 
 TEMPLATES = [
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "project.wsgi.application"
+WSGI_APPLICATION = "cs412.wsgi.application"
 
 
 # Database
@@ -120,7 +120,7 @@ USE_TZ = True
 import os
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/' # note: no leading slash!
+STATIC_URL = 'static/' # note: no leading slash!
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
@@ -133,15 +133,12 @@ import socket
 CS_DEPLOYMENT_HOSTNAME = 'cs-webapps.bu.edu'
 
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-MEDIA_URL = "/media/"
-
 if socket.gethostname() == CS_DEPLOYMENT_HOSTNAME:
     STATIC_URL = '/jeongsh/static/'
     MEDIA_URL = '/jeongsh/media/'
 
-LOGIN_URL = "/paper_tracker/login/"
-LOGIN_REDIRECT_URL = "/paper_tracker/"
-LOGOUT_REDIRECT_URL = "/paper_tracker/"
+LOGIN_URL = "paper_tracker:login"
+LOGIN_REDIRECT_URL = "paper_tracker:show_all_papers"
+LOGOUT_REDIRECT_URL = "paper_tracker:show_all_papers"
 
 
