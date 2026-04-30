@@ -1,4 +1,7 @@
 {% extends 'paper_tracker/base.html' %}
+{# File: show_dashboard.html #}
+{# Author: Jake Jeong #}
+{# Description: Personalized dashboard built from a user's followed items. #}
 
 {% block title %}Dashboard{% endblock %}
 
@@ -60,6 +63,7 @@
 
 <h3 class="section-title">Recommended Papers</h3>
 
+{# recommended_papers is deduplicated in the view from all followed items. #}
 {% if recommended_papers %}
     {% for paper in recommended_papers %}
         <div class="card paper-card">

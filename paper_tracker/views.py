@@ -3,28 +3,38 @@
 # Description: Views for the paper tracking web app.
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.urls import reverse
+from datetime import timedelta
+from django.utils import timezone
 
 from django.contrib.auth.mixins import LoginRequiredMixin as DjangoLoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
 from .models import UserProfile, Topic, Institution, Author, Paper, ReadingList, SavedPaper, Follow
-from .forms import CreateProfileForm, ReadingListForm, SavePaperForm
+from .forms import CreateProfileForm, UpdateProfileForm, ReadingListForm, SavePaperForm
 
 class PaperTrackerLoginRequiredMixin(DjangoLoginRequiredMixin):
-    """Mixin for views that require a logged-in user profile."""
+    """
+    Custom login-required mixin for the paper tracker app.
+
+    Provides a helper method, get_profile(), that returns the UserProfile
+    associated with the currently logged-in Django User.
+    """
 
     def get_profile(self):
+        """
+        Return the UserProfile for the currently logged-in user.
+        """
         user = self.request.user
         profile = UserProfile.objects.get(user=user)
         return profile
 
-    def get_object(self):
-        return self.get_profile()
-
     def get_login_url(self):
+        """
+        Redirect unauthenticated users to the paper tracker login page.
+        """
         return reverse('paper_tracker:login')
 
 class ShowAllPapersView(ListView):
@@ -55,6 +65,7 @@ class ShowTopicView(DetailView):
         context["my_profile"] = None
         context["is_following"] = False
 
+        # Follow controls are only shown for authenticated users with profiles.
         if self.request.user.is_authenticated:
             profile = UserProfile.objects.get(user=self.request.user)
             context["my_profile"] = profile
@@ -81,6 +92,7 @@ class ShowAuthorView(DetailView):
         context["my_profile"] = None
         context["is_following"] = False
 
+        # Follow controls are only shown for authenticated users with profiles.
         if self.request.user.is_authenticated:
             profile = UserProfile.objects.get(user=self.request.user)
             context["my_profile"] = profile
@@ -108,6 +120,7 @@ class ShowInstitutionView(DetailView):
         context["my_profile"] = None
         context["is_following"] = False
 
+        # Follow controls are only shown for authenticated users with profiles.
         if self.request.user.is_authenticated:
             profile = UserProfile.objects.get(user=self.request.user)
             context["my_profile"] = profile
@@ -183,6 +196,7 @@ class SavePaperView(PaperTrackerLoginRequiredMixin, CreateView):
     def form_valid(self, form):
         reading_list = form.cleaned_data["reading_list"]
 
+        # Avoid duplicate saves if the user submits the same paper/list pair again.
         saved_paper, created = SavedPaper.objects.get_or_create(
             paper=self.paper,
             reading_list=reading_list,
@@ -319,6 +333,7 @@ class ShowDashboardView(DetailView):
 
         recommended_papers = []
 
+        # Build a simple deduplicated recommendation list from all followed items.
         for follow in follows:
             if follow.follow_type == "topic" and follow.topic:
                 followed_topics.append(follow.topic)
@@ -391,12 +406,23 @@ class CreateProfileView(CreateView):
         return reverse("paper_tracker:show_profile", kwargs={"pk": self.object.pk})
 
 class MyProfileView(PaperTrackerLoginRequiredMixin, DetailView):
-    """View to show the logged-in user's own profile."""
+    """
+    View to show the logged-in user's own profile.
+    """
     model = UserProfile
     template_name = "paper_tracker/show_profile.html"
     context_object_name = "profile"
 
+    def get_object(self):
+        """
+        Return the logged-in user's own UserProfile.
+        """
+        return self.get_profile()
+
     def get_context_data(self, **kwargs):
+        """
+        Add the logged-in user's reading lists and follows to the profile page.
+        """
         context = super().get_context_data(**kwargs)
         profile = self.get_profile()
 
@@ -420,6 +446,7 @@ class SearchPapersView(ListView):
         institution_id = self.request.GET.get("institution", "").strip()
 
         if query:
+            # Search across the main paper metadata and related model names.
             title_matches = Paper.objects.filter(title__icontains=query)
             abstract_matches = Paper.objects.filter(abstract__icontains=query)
             venue_matches = Paper.objects.filter(conference_or_journal_name__icontains=query)
@@ -458,5 +485,281 @@ class SearchPapersView(ListView):
         context["selected_topic"] = self.request.GET.get("topic", "")
         context["selected_author"] = self.request.GET.get("author", "")
         context["selected_institution"] = self.request.GET.get("institution", "")
+
+        return context
+
+class UpdateReadingListView(PaperTrackerLoginRequiredMixin, UpdateView):
+    """
+    View that allows a logged-in user to update one of their own reading lists.
+
+    The queryset is restricted so users cannot update reading lists that belong
+    to other users.
+    """
+    model = ReadingList
+    form_class = ReadingListForm
+    template_name = "paper_tracker/update_reading_list.html"
+    context_object_name = "reading_list"
+
+    def get_queryset(self):
+        """
+        Only allow the logged-in user to access their own reading lists.
+        """
+        return ReadingList.objects.filter(user_profile=self.get_profile())
+
+    def get_success_url(self):
+        """
+        After updating, return to the updated reading list detail page.
+        """
+        return reverse("paper_tracker:show_reading_list", kwargs={"pk": self.object.pk})
+
+
+class DeleteReadingListView(PaperTrackerLoginRequiredMixin, DeleteView):
+    """
+    View that allows a logged-in user to delete one of their own reading lists.
+
+    Deleting a reading list also deletes the SavedPaper records inside it
+    because SavedPaper has a ForeignKey to ReadingList with on_delete=CASCADE.
+    """
+    model = ReadingList
+    template_name = "paper_tracker/delete_reading_list.html"
+    context_object_name = "reading_list"
+
+    def get_queryset(self):
+        """
+        Only allow the logged-in user to delete their own reading lists.
+        """
+        return ReadingList.objects.filter(user_profile=self.get_profile())
+
+    def get_success_url(self):
+        """
+        After deleting, return to the logged-in user's profile page.
+        """
+        return reverse("paper_tracker:my_profile")
+
+class RemoveSavedPaperView(PaperTrackerLoginRequiredMixin, DeleteView):
+    """
+    View that removes a saved paper from one of the logged-in user's reading lists.
+
+    This deletes the SavedPaper object, not the original Paper object.
+    """
+    model = SavedPaper
+    template_name = "paper_tracker/remove_saved_paper.html"
+    context_object_name = "saved_paper"
+
+    def get_queryset(self):
+        """
+        Only allow users to remove saved papers from their own reading lists.
+        """
+        return SavedPaper.objects.filter(
+            reading_list__user_profile=self.get_profile()
+        )
+
+    def get_success_url(self):
+        """
+        After removing the saved paper, return to the reading list page.
+        """
+        return reverse(
+            "paper_tracker:show_reading_list",
+            kwargs={"pk": self.object.reading_list.pk}
+        )
+    
+class UpdateProfileView(PaperTrackerLoginRequiredMixin, UpdateView):
+    """
+    View that allows the logged-in user to update their own profile.
+    """
+    model = UserProfile
+    form_class = UpdateProfileForm
+    template_name = "paper_tracker/update_profile_form.html"
+    context_object_name = "profile"
+
+    def get_object(self):
+        """
+        Return the logged-in user's own UserProfile.
+        This prevents users from editing another user's profile.
+        """
+        return self.get_profile()
+
+    def form_valid(self, form):
+        """
+        Save the UserProfile update.
+
+        Also synchronizes the email field with the associated Django User object.
+        """
+        response = super().form_valid(form)
+
+        self.request.user.email = form.cleaned_data["email"]
+        self.request.user.save()
+
+        return response
+
+    def get_success_url(self):
+        """
+        After updating, return to the logged-in user's profile page.
+        """
+        return reverse("paper_tracker:my_profile")
+
+class ResearchDigestView(PaperTrackerLoginRequiredMixin, TemplateView):
+    """
+    View that creates a personalized research digest for the logged-in user.
+
+    The digest uses the user's followed topics, authors, and institutions to
+    find recent relevant papers. It also includes high-influence recent papers.
+    Each paper receives a simple digest score and a list of reasons explaining
+    why it was included.
+    """
+    template_name = "paper_tracker/research_digest.html"
+
+    def get_days(self):
+        """
+        Return the selected time window in days.
+
+        The user can choose this with a GET parameter, for example:
+        /paper_tracker/digest/?days=30
+        """
+        try:
+            days = int(self.request.GET.get("days", 90))
+        except ValueError:
+            days = 90
+
+        if days not in [7, 30, 90, 365]:
+            days = 90
+
+        return days
+
+    def add_digest_entry(self, digest_entries, paper, reason, score_points):
+        """
+        Add a paper to the digest.
+
+        If the paper is already in the digest, this method adds another reason
+        and increases the score instead of duplicating the paper.
+        """
+        if paper.pk not in digest_entries:
+            digest_entries[paper.pk] = {
+                "paper": paper,
+                "reasons": [],
+                "score": 0,
+            }
+
+        if reason not in digest_entries[paper.pk]["reasons"]:
+            digest_entries[paper.pk]["reasons"].append(reason)
+
+        digest_entries[paper.pk]["score"] += score_points
+
+    def get_context_data(self, **kwargs):
+        """
+        Build the personalized digest context.
+
+        The digest is based on:
+        - followed topics
+        - followed authors
+        - followed institutions
+        - recent high-influence papers
+        """
+        context = super().get_context_data(**kwargs)
+
+        profile = self.get_profile()
+        days = self.get_days()
+        cutoff_date = timezone.localdate() - timedelta(days=days)
+
+        follows = Follow.objects.filter(user_profile=profile)
+
+        followed_topics = []
+        followed_authors = []
+        followed_institutions = []
+
+        digest_entries = {}
+
+        # Each matching follow adds a reason and score to the digest entry.
+        for follow in follows:
+            if follow.follow_type == "topic" and follow.topic:
+                topic = follow.topic
+                followed_topics.append(topic)
+
+                papers = Paper.objects.filter(
+                    topic=topic,
+                    publication_date__gte=cutoff_date
+                )
+
+                for paper in papers:
+                    self.add_digest_entry(
+                        digest_entries,
+                        paper,
+                        f"Matches followed topic: {topic.name}",
+                        2
+                    )
+
+            elif follow.follow_type == "author" and follow.author:
+                author = follow.author
+                followed_authors.append(author)
+
+                papers = author.get_papers().filter(
+                    publication_date__gte=cutoff_date
+                )
+
+                for paper in papers:
+                    self.add_digest_entry(
+                        digest_entries,
+                        paper,
+                        f"Written by followed author: {author.name}",
+                        3
+                    )
+
+            elif follow.follow_type == "institution" and follow.institution:
+                institution = follow.institution
+                followed_institutions.append(institution)
+
+                papers = Paper.objects.filter(
+                    institution=institution,
+                    publication_date__gte=cutoff_date
+                )
+
+                for paper in papers:
+                    self.add_digest_entry(
+                        digest_entries,
+                        paper,
+                        f"From followed institution: {institution.name}",
+                        1
+                    )
+
+        high_influence_papers = Paper.objects.filter(
+            publication_date__gte=cutoff_date
+        ).order_by("-influence_score", "-publication_date")[:5]
+
+        # Add broadly important recent papers even when they do not match a follow.
+        for paper in high_influence_papers:
+            self.add_digest_entry(
+                digest_entries,
+                paper,
+                f"High-influence recent paper with score {paper.influence_score}",
+                1
+            )
+
+        digest_list = list(digest_entries.values())
+
+        # Higher digest scores win, then influence and publication date break ties.
+        digest_list.sort(
+            key=lambda entry: (
+                entry["score"],
+                entry["paper"].influence_score,
+                entry["paper"].publication_date,
+            ),
+            reverse=True
+        )
+
+        context["profile"] = profile
+        context["days"] = days
+        context["cutoff_date"] = cutoff_date
+
+        context["followed_topics"] = followed_topics
+        context["followed_authors"] = followed_authors
+        context["followed_institutions"] = followed_institutions
+
+        context["digest_entries"] = digest_list
+        context["high_influence_papers"] = high_influence_papers
+
+        context["num_followed_topics"] = len(followed_topics)
+        context["num_followed_authors"] = len(followed_authors)
+        context["num_followed_institutions"] = len(followed_institutions)
+        context["num_digest_papers"] = len(digest_list)
 
         return context

@@ -1,0 +1,22 @@
+{% extends 'paper_tracker/base.html' %}
+{# File: update_profile_form.html #}
+{# Author: Jake Jeong #}
+{# Description: Form page for updating the logged-in user's profile. #}
+
+{% block title %}Update Profile{% endblock %}
+
+{% block content %}
+<h2>Update Profile</h2>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Save Profile</button>
+        <a class="secondary-link" href="{% url 'paper_tracker:my_profile' %}">
+            Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}

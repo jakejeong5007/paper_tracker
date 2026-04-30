@@ -1,3 +1,7 @@
+{# File: base.html #}
+{# Author: Jake Jeong #}
+{# Description: Base layout shared by all Paper Tracker pages. #}
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -16,7 +20,9 @@
             <a href="{% url 'paper_tracker:show_all_papers' %}">All Papers</a>
             <a href="{% url 'paper_tracker:search_papers' %}">Search Papers</a>
 
+            {# The account links change based on whether Django has a logged-in user. #}
             {% if user.is_authenticated %}
+                <a href="{% url 'paper_tracker:research_digest' %}">Research Digest</a>
                 <a href="{% url 'paper_tracker:my_profile' %}">My Profile</a>
                 <a href="{% url 'paper_tracker:create_reading_list' %}">Create Reading List</a>
 

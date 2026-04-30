@@ -1,4 +1,7 @@
 {% extends 'paper_tracker/base.html' %}
+{# File: show_profile.html #}
+{# Author: Jake Jeong #}
+{# Description: Profile page showing user details, reading lists, and follows. #}
 
 {% block title %}{{ profile.display_name }}{% endblock %}
 
@@ -12,24 +15,37 @@
     <p><strong>Date Joined:</strong> {{ profile.date_joined }}</p>
 
     {% if user.is_authenticated and profile.user == user %}
-        <a class="button-link" href="{% url 'paper_tracker:show_dashboard' profile.pk %}">
-            View Personalized Dashboard
-        </a>
+        <div class="action-row">
+            <a class="button-link" href="{% url 'paper_tracker:update_profile' %}">
+                Edit Profile
+            </a>
+
+            <a class="button-link secondary-button" href="{% url 'paper_tracker:show_dashboard' profile.pk %}">
+                View Personalized Dashboard
+            </a>
+
+            <a class="button-link secondary-button" href="{% url 'paper_tracker:research_digest' %}">
+                View Research Digest
+            </a>
+        </div>
     {% endif %}
 </div>
 
 <h3 class="section-title">Reading Lists</h3>
 
 {% if reading_lists %}
-    <ul>
-        {% for reading_list in reading_lists %}
-            <li>
+    {% for reading_list in reading_lists %}
+        <div class="card">
+            <h3>
                 <a href="{% url 'paper_tracker:show_reading_list' reading_list.pk %}">
                     {{ reading_list.name }}
                 </a>
-            </li>
-        {% endfor %}
-    </ul>
+            </h3>
+
+            <p>{{ reading_list.description }}</p>
+            <p class="muted">Created at {{ reading_list.created_at }}</p>
+        </div>
+    {% endfor %}
 {% else %}
     <p>No reading lists found.</p>
 {% endif %}

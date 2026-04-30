@@ -1,0 +1,139 @@
+{% extends 'paper_tracker/base.html' %}
+{# File: research_digest.html #}
+{# Author: Jake Jeong #}
+{# Description: Personalized digest of recent and influential papers. #}
+
+{% block title %}Research Digest{% endblock %}
+
+{% block content %}
+<h2>{{ profile.display_name }}'s Research Digest</h2>
+
+<div class="card digest-header">
+    <p>
+        This digest summarizes recent and influential papers based on your followed
+        topics, authors, and institutions.
+    </p>
+
+    <form method="get" class="digest-filter-form">
+        <label for="days">Time window:</label>
+
+        <select name="days" id="days">
+            <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 days</option>
+            <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 days</option>
+            <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 days</option>
+            <option value="365" {% if days == 365 %}selected{% endif %}>Last 365 days</option>
+        </select>
+
+        <button type="submit">Update Digest</button>
+    </form>
+
+    <p class="muted">
+        Showing papers published since {{ cutoff_date }}.
+    </p>
+</div>
+
+<div class="digest-stats">
+    <div class="stat-card">
+        <h3>{{ num_digest_papers }}</h3>
+        <p>Digest Papers</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>{{ num_followed_topics }}</h3>
+        <p>Followed Topics</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>{{ num_followed_authors }}</h3>
+        <p>Followed Authors</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>{{ num_followed_institutions }}</h3>
+        <p>Followed Institutions</p>
+    </div>
+</div>
+
+<h3 class="section-title">Recommended Digest Papers</h3>
+
+{# Each digest entry includes the paper plus the scored reasons built in the view. #}
+{% if digest_entries %}
+    {% for entry in digest_entries %}
+        <div class="card paper-card digest-card">
+            <div class="digest-score">
+                Digest Score: {{ entry.score }}
+            </div>
+
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' entry.paper.pk %}">
+                    {{ entry.paper.title }}
+                </a>
+            </h3>
+
+            <p><strong>Venue:</strong> {{ entry.paper.conference_or_journal_name }}</p>
+            <p><strong>Publication Date:</strong> {{ entry.paper.publication_date }}</p>
+            <p><strong>Influence Score:</strong> {{ entry.paper.influence_score }}</p>
+
+            {% if entry.paper.topic %}
+                <p>
+                    <strong>Topic:</strong>
+                    <a href="{% url 'paper_tracker:show_topic' entry.paper.topic.pk %}">
+                        {{ entry.paper.topic.name }}
+                    </a>
+                </p>
+            {% endif %}
+
+            {% if entry.paper.institution %}
+                <p>
+                    <strong>Institution:</strong>
+                    <a href="{% url 'paper_tracker:show_institution' entry.paper.institution.pk %}">
+                        {{ entry.paper.institution.name }}
+                    </a>
+                </p>
+            {% endif %}
+
+            <h4>Why this paper is in your digest:</h4>
+            <ul>
+                {% for reason in entry.reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+
+            <div class="action-row">
+                <a class="button-link" href="{% url 'paper_tracker:show_paper' entry.paper.pk %}">
+                    View Paper
+                </a>
+
+                <a class="button-link secondary-button" href="{% url 'paper_tracker:save_paper' entry.paper.pk %}">
+                    Save to Reading List
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p class="notice">
+        No digest papers found for this time window. Try following more topics,
+        authors, or institutions, or select a longer time window.
+    </p>
+{% endif %}
+
+<h3 class="section-title">Top High-Influence Recent Papers</h3>
+
+{% if high_influence_papers %}
+    {% for paper in high_influence_papers %}
+        <div class="card paper-card">
+            <h3>
+                <a href="{% url 'paper_tracker:show_paper' paper.pk %}">
+                    {{ paper.title }}
+                </a>
+            </h3>
+
+            <p><strong>Influence Score:</strong> {{ paper.influence_score }}</p>
+            <p><strong>Publication Date:</strong> {{ paper.publication_date }}</p>
+            <p><strong>Venue:</strong> {{ paper.conference_or_journal_name }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No high-influence papers found in this time window.</p>
+{% endif %}
+{% endblock %}

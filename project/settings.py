@@ -25,7 +25,8 @@ SECRET_KEY = "django-insecure-+d3@uvs#v63637(pqct3fnm0$=i*8!^8ua(u&d0%m%)q6=16!)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = ['cs-webapps.bu.edu', '*']
 
 
 # Application definition
@@ -115,7 +116,31 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "/static/"
+import os
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/' # note: no leading slash!
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_URL= "media/"  # note: no leading slash!
+
+import socket
+CS_DEPLOYMENT_HOSTNAME = 'cs-webapps.bu.edu'
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_URL = "/media/"
+
+if socket.gethostname() == CS_DEPLOYMENT_HOSTNAME:
+    STATIC_URL = '/jeongsh/static/'
+    MEDIA_URL = '/jeongsh/media/'
+
 LOGIN_URL = "/paper_tracker/login/"
 LOGIN_REDIRECT_URL = "/paper_tracker/"
 LOGOUT_REDIRECT_URL = "/paper_tracker/"
+
+

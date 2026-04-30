@@ -5,9 +5,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
-
 class UserProfile(models.Model):
+    """Project-specific profile data attached to Django's built-in User."""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -29,6 +28,7 @@ class UserProfile(models.Model):
 
 
 class Topic(models.Model):
+    """Research area used to classify papers and drive recommendations."""
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     category_type = models.CharField(max_length=100)
@@ -41,6 +41,7 @@ class Topic(models.Model):
 
 
 class Institution(models.Model):
+    """University, company, or other organization associated with papers."""
     name = models.CharField(max_length=200)
     institution_type = models.CharField(max_length=100)
     country = models.CharField(max_length=100, blank=True)
@@ -57,6 +58,7 @@ class Institution(models.Model):
 
 
 class Author(models.Model):
+    """Researcher profile connected to papers through Paper.authors."""
     name = models.CharField(max_length=150)
     email = models.EmailField(blank=True)
     institution = models.ForeignKey(Institution, on_delete=models.SET_NULL, null=True, blank=True)
@@ -70,6 +72,7 @@ class Author(models.Model):
 
 
 class Paper(models.Model):
+    """A research paper with metadata used for search, saving, and digests."""
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, blank=True)
     abstract = models.TextField()
@@ -96,6 +99,7 @@ class Paper(models.Model):
 
 
 class ReadingList(models.Model):
+    """A user-owned collection of saved papers."""
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
     description = models.TextField(blank=True)
@@ -112,6 +116,7 @@ class ReadingList(models.Model):
 
 
 class SavedPaper(models.Model):
+    """Join model linking one paper to one user reading list."""
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     reading_list = models.ForeignKey(ReadingList, on_delete=models.CASCADE)
     saved_date = models.DateTimeField(auto_now_add=True)
@@ -127,17 +132,17 @@ class SavedPaper(models.Model):
 
 
 class Follow(models.Model):
+    """Stores a user's follow relationship to exactly one followable object."""
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     follow_type = models.CharField(max_length=50)   # topic, author, or institution
+    # Only one of these target fields should be populated for each Follow row.
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, null=True, blank=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True, blank=True)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, null=True, blank=True)
     followed_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.user_profile.display_name} follows {self.follow_type}"
-
     def get_followed_object(self):
+        """Return the topic, author, or institution being followed."""
         if self.follow_type == "topic":
             return self.topic
         elif self.follow_type == "author":
@@ -145,3 +150,13 @@ class Follow(models.Model):
         elif self.follow_type == "institution":
             return self.institution
         return None
+
+    def __str__(self):
+        """Return a readable description of the follow relationship."""
+        followed_object = self.get_followed_object()
+
+        if followed_object:
+            return f"{self.user_profile.display_name} follows {self.follow_type}: {followed_object}"
+
+        return f"{self.user_profile.display_name} follows {self.follow_type}"
+    

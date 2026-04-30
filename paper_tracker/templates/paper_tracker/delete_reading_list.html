@@ -1,0 +1,32 @@
+{% extends 'paper_tracker/base.html' %}
+{# File: delete_reading_list.html #}
+{# Author: Jake Jeong #}
+{# Description: Confirmation page for deleting a user-owned reading list. #}
+
+{% block title %}Delete Reading List{% endblock %}
+
+{% block content %}
+<h2>Delete Reading List</h2>
+
+<div class="card danger-card">
+    <p>
+        Are you sure you want to delete this reading list?
+    </p>
+
+    <h3>{{ reading_list.name }}</h3>
+
+    <p class="muted">
+        This will also remove all saved paper entries inside this reading list.
+        The original paper records will not be deleted.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="danger-button">Delete Reading List</button>
+        <a class="secondary-link" href="{% url 'paper_tracker:show_reading_list' reading_list.pk %}">
+            Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}

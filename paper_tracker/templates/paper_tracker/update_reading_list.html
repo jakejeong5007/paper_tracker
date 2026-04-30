@@ -1,0 +1,22 @@
+{% extends 'paper_tracker/base.html' %}
+{# File: update_reading_list.html #}
+{# Author: Jake Jeong #}
+{# Description: Form page for updating a user-owned reading list. #}
+
+{% block title %}Update Reading List{% endblock %}
+
+{% block content %}
+<h2>Update Reading List</h2>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Save Changes</button>
+        <a class="secondary-link" href="{% url 'paper_tracker:show_reading_list' reading_list.pk %}">
+            Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}

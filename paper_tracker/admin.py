@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import *
-# Register your models here.
 
+# Expose all app models in Django admin for manual data entry and review.
 admin.site.register(UserProfile)
 admin.site.register(Topic)
 admin.site.register(Institution)

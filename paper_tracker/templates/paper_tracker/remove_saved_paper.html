@@ -1,0 +1,36 @@
+{% extends 'paper_tracker/base.html' %}
+{# File: remove_saved_paper.html #}
+{# Author: Jake Jeong #}
+{# Description: Confirmation page for removing a saved paper from a reading list. #}
+
+{% block title %}Remove Saved Paper{% endblock %}
+
+{% block content %}
+<h2>Remove Saved Paper</h2>
+
+<div class="card danger-card">
+    <p>
+        Are you sure you want to remove this paper from your reading list?
+    </p>
+
+    <h3>{{ saved_paper.paper.title }}</h3>
+
+    <p>
+        <strong>Reading List:</strong> {{ saved_paper.reading_list.name }}
+    </p>
+
+    <p class="muted">
+        This only removes the paper from this reading list. It does not delete
+        the original paper record.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="danger-button">Remove Paper</button>
+        <a class="secondary-link" href="{% url 'paper_tracker:show_reading_list' saved_paper.reading_list.pk %}">
+            Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}

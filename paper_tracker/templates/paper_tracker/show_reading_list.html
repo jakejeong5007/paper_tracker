@@ -1,4 +1,7 @@
 {% extends 'paper_tracker/base.html' %}
+{# File: show_reading_list.html #}
+{# Author: Jake Jeong #}
+{# Description: Detail page for a reading list and its saved papers. #}
 
 {% block title %}{{ reading_list.name }}{% endblock %}
 
@@ -14,6 +17,18 @@
 
     <p><strong>Description:</strong> {{ reading_list.description }}</p>
     <p><strong>Created At:</strong> {{ reading_list.created_at }}</p>
+
+    {% if user.is_authenticated and reading_list.user_profile.user == user %}
+        <div class="action-row">
+            <a class="button-link" href="{% url 'paper_tracker:update_reading_list' reading_list.pk %}">
+                Edit Reading List
+            </a>
+
+            <a class="button-link danger-button" href="{% url 'paper_tracker:delete_reading_list' reading_list.pk %}">
+                Delete Reading List
+            </a>
+        </div>
+    {% endif %}
 </div>
 
 <h3 class="section-title">Saved Papers</h3>
@@ -26,7 +41,14 @@
                     {{ saved_paper.paper.title }}
                 </a>
             </h3>
+
             <p class="muted">Saved on {{ saved_paper.saved_date }}</p>
+
+            {% if user.is_authenticated and reading_list.user_profile.user == user %}
+                <a class="button-link danger-button" href="{% url 'paper_tracker:remove_saved_paper' saved_paper.pk %}">
+                    Remove from Reading List
+                </a>
+            {% endif %}
         </div>
     {% endfor %}
 {% else %}
